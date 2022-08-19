@@ -9,6 +9,11 @@ const emptyMap = [
   ["", "", ""],
   ["", "", ""],
 ];
+
+const copyMap = (original) => {
+  const copy = JSON.parse(JSON.stringify(original));
+  return copy;
+}
 export default function App() {
   const [map, setMap] = useState(emptyMap);
   const [currentTurn, setCurrentTurn] = useState('x');
@@ -36,7 +41,7 @@ export default function App() {
 
     setCurrentTurn(currentTurn == 'x' ? "o" : "x");
 
-    const winner = getWinner();
+    const winner = getWinner(map);
     if (winner) {
       gameWon(winner);
     }
@@ -46,11 +51,11 @@ export default function App() {
 
   };
 
-  const getWinner = () => {
+  const getWinner = (winningMap) => {
     // check rows
     for (let i = 0; i < 3; i++) {
-      const isRowxWinning = map[i].every(cell => cell == 'x');
-      const isRowoWinning = map[i].every(cell => cell == 'o');
+      const isRowxWinning = winningMap[i].every(cell => cell == 'x');
+      const isRowoWinning = winningMap[i].every(cell => cell == 'o');
       if (isRowxWinning) {
         return 'x';
 
@@ -68,12 +73,12 @@ export default function App() {
 
       for (let row = 0; row < 3; row++) {
         // if any of row in col is not 'x' x did not win -> set isColxWinner to false
-        if (map[row][col] !== 'x') {
+        if (winningMap[row][col] !== 'x') {
           isColxWinner = false;
         }
         // if any of row in col is not 'o' o did not win -> set isColoWinner to false
 
-        if (map[row][col] !== 'o') {
+        if (winningMap[row][col] !== 'o') {
           isColoWinner = false;
         }
       }
@@ -94,17 +99,17 @@ export default function App() {
     let isDiagonalrightoWinning = true;
     let isDiagonalrightxWinning = true;
     for (let i = 0; i < 3; i++) {
-      if (map[i][i] != 'x') {
+      if (winningMap[i][i] != 'x') {
         isDiagonalleftxWinning = false;
       }
-      if (map[i][i] != 'o') {
+      if (winningMap[i][i] != 'o') {
         isDiagonalleftoWinning = false;
       }
 
-      if (map[i][2 - i] != 'x') {
+      if (winningMap[i][2 - i] != 'x') {
         isDiagonalrightxWinning = false;
       }
-      if (map[i][2 - i] != 'o') {
+      if (winningMap[i][2 - i] != 'o') {
         isDiagonalrightoWinning = false;
       }
     }
@@ -151,8 +156,25 @@ export default function App() {
         }
       });
     });
+
+    let choosenOption;
+    // Check if the opponent will win if it chooses one of the possible positons 
+    possiblePositions.forEach((possiblePosition) => {
+      const mapCopy = copyMap(map);
+      mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+      const winner = getWinner(mapCopy);
+      if (winner == 'x') {
+        choosenOption = possiblePosition;
+      }
+    });
+
+    // choose random 
+    if (!choosenOption) {
+      choosenOption = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+    }
+
     // choose the best option
-    const choosenOption = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+
     if (choosenOption) {
       onPress(choosenOption.row, choosenOption.col);
     }
