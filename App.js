@@ -147,7 +147,12 @@ export default function App() {
       {/* keep everything in image background, so all elements considered as children */}
       {/* resideMode contain will make sure it fits the screen */}
       <ImageBackground source={bg} style={styles.bg} resizeMode="contain">
-        <Text>Current Turn: {currentTurn}</Text>
+        <Text style={{
+          fontSize: 24,
+          color: "white",
+          position: "absolute",
+          top: 50,
+        }}>Current Turn: {currentTurn.toUpperCase()}</Text>
         <View style={styles.map}>
           {map.map((row, rowIndex) => (
             <View key={`row - ${rowIndex}`} style={styles.row}>
