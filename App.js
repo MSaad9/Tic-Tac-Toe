@@ -11,12 +11,16 @@ const emptyMap = [
 ];
 
 const copyMap = (original) => {
-  const copy = JSON.parse(JSON.stringify(original));
+  const copy = original.map((arr) => {
+    return arr.slice();
+  });
   return copy;
 }
 export default function App() {
   const [map, setMap] = useState(emptyMap);
   const [currentTurn, setCurrentTurn] = useState('x');
+  // Game options: local, BOT EASY, BOT MEDIUM
+  const [gameMode, setGameMode] = useState('BOT MEDIUM');
 
   useEffect(() => {
 
@@ -25,6 +29,19 @@ export default function App() {
     }
     // botTurn is trigered every time currentTurn changes but with if condition only 'o' 
   }, [currentTurn]);
+
+
+  // it will update map whenever map is changed 
+  // it will actually update in next frame but we will not notice it 
+  useEffect(() => {
+    const winner = getWinner(map);
+    if (winner) {
+      gameWon(winner);
+    }
+    else {
+      checkTieState();
+    }
+  }, [map]);
 
   const onPress = (rowIndex, colIndex) => {
 
@@ -41,14 +58,6 @@ export default function App() {
 
     setCurrentTurn(currentTurn == 'x' ? "o" : "x");
 
-    const winner = getWinner(map);
-    if (winner) {
-      gameWon(winner);
-    }
-    else {
-      checkTieState();
-    }
-
   };
 
   const getWinner = (winningMap) => {
@@ -61,7 +70,7 @@ export default function App() {
 
       }
       if (isRowoWinning) {
-        return 'O';
+        return 'o';
 
       }
     }
@@ -89,7 +98,7 @@ export default function App() {
       }
 
       if (isColoWinner) {
-        return 'O';
+        return 'o';
       }
     }
 
@@ -116,7 +125,7 @@ export default function App() {
 
 
     if (isDiagonalleftoWinning || isDiagonalrightoWinning) {
-      return 'O';
+      return 'o';
     }
     if (isDiagonalleftxWinning || isDiagonalrightxWinning) {
       return 'x';
@@ -157,16 +166,30 @@ export default function App() {
       });
     });
 
+
     let choosenOption;
     // Check if the opponent will win if it chooses one of the possible positons 
+    // Attack
     possiblePositions.forEach((possiblePosition) => {
       const mapCopy = copyMap(map);
-      mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+      mapCopy[possiblePosition.row][possiblePosition.col] = "o";
       const winner = getWinner(mapCopy);
-      if (winner == 'x') {
+      if (winner == 'o') {
         choosenOption = possiblePosition;
       }
     });
+    // defend
+    if (!choosenOption) {
+      possiblePositions.forEach((possiblePosition) => {
+        const mapCopy = copyMap(map);
+        mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+        const winner = getWinner(mapCopy);
+        if (winner == 'x') {
+          choosenOption = possiblePosition;
+        }
+      });
+
+    }
 
     // choose random 
     if (!choosenOption) {
@@ -180,6 +203,7 @@ export default function App() {
     }
 
   };
+
 
   const resetGame = () => {
     setMap([
