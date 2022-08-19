@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ImageBackground, Pressable, Alert } from 'react-native';
 import bg from './assets/bg.jpeg';
 import React, { useState } from 'react';
+import Cross from './src/components/Cross';
 
 const emptyMap = [
   ["", "", ""],
@@ -161,12 +162,7 @@ export default function App() {
                   key={`row - ${rowIndex} - col - ${colIndex}`}
                   onPress={() => onPress(rowIndex, colIndex)} style={styles.cell}>
                   {cell == 'o' && <View style={styles.circle} />}
-                  {cell == 'x' && (
-                    <View style={styles.cross}>
-                      <View style={styles.crossLine} />
-                      <View style={[styles.crossLine, styles.crossLineReversed]} />
-                    </View>
-                  )}
+                  {cell == 'x' && <Cross />}
                 </Pressable>
               ))}
 
@@ -228,27 +224,5 @@ const styles = StyleSheet.create({
 
   },
 
-  cross: {
-    flex: 1,
-  },
-  crossLine: {
-    position: 'absolute',
-    left: "48%",
-    width: 10,
-    height: "100%",
-    backgroundColor: 'white',
-    borderRadius: 5,
-    transform: [
-      {
-        "rotate": "45deg",
-      },
-    ],
-  },
-  crossLineReversed: {
-    transform: [
-      {
-        "rotate": "-45deg",
-      },
-    ],
-  }
+
 });
