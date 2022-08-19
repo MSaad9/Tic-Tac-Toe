@@ -20,15 +20,15 @@ export default function App() {
   const [map, setMap] = useState(emptyMap);
   const [currentTurn, setCurrentTurn] = useState('x');
   // Game options: local, BOT EASY, BOT MEDIUM
-  const [gameMode, setGameMode] = useState('BOT MEDIUM');
+  const [gameMode, setGameMode] = useState('BOT_MEDIUM');
 
   useEffect(() => {
 
-    if (currentTurn == "o") {
+    if (currentTurn == "o" && gameMode != "LOCAL") {
       botTurn();
     }
     // botTurn is trigered every time currentTurn changes but with if condition only 'o' 
-  }, [currentTurn]);
+  }, [currentTurn, gameMode]);
 
 
   // it will update map whenever map is changed 
@@ -169,26 +169,44 @@ export default function App() {
 
     let choosenOption;
     // Check if the opponent will win if it chooses one of the possible positons 
-    // Attack
-    possiblePositions.forEach((possiblePosition) => {
-      const mapCopy = copyMap(map);
-      mapCopy[possiblePosition.row][possiblePosition.col] = "o";
-      const winner = getWinner(mapCopy);
-      if (winner == 'o') {
-        choosenOption = possiblePosition;
-      }
-    });
-    // defend
-    if (!choosenOption) {
+    if (gameMode == "BOT_MEDIUM") {
+
+
+      // Attack
       possiblePositions.forEach((possiblePosition) => {
         const mapCopy = copyMap(map);
-        mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+        mapCopy[possiblePosition.row][possiblePosition.col] = "o";
         const winner = getWinner(mapCopy);
-        if (winner == 'x') {
+        if (winner == 'o') {
           choosenOption = possiblePosition;
         }
       });
+      // defend
+      if (!choosenOption) {
+        possiblePositions.forEach((possiblePosition) => {
+          const mapCopy = copyMap(map);
+          mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+          const winner = getWinner(mapCopy);
+          if (winner == 'x') {
+            choosenOption = possiblePosition;
+          }
+        });
 
+      }
+    }
+
+    if (gameMode == "BOT_EASY") {
+      if (!choosenOption) {
+        possiblePositions.forEach((possiblePosition) => {
+          const mapCopy = copyMap(map);
+          mapCopy[possiblePosition.row][possiblePosition.col] = "x";
+          const winner = getWinner(mapCopy);
+          if (winner == 'x') {
+            choosenOption = possiblePosition;
+          }
+        });
+
+      }
     }
 
     // choose random 
@@ -230,27 +248,45 @@ export default function App() {
             <View key={`row - ${rowIndex}`} style={styles.row}>
               {row.map((cell, colIndex) => (
                 <Cell
-                  key={`row - ${rowIndex} - col - ${colIndex}`}
+                  key={`row-${rowIndex}-col-${colIndex}`}
                   cell={cell}
                   // on press would not receive anything from cell but local method would send the rowIndex and colIndex 
                   // no point in sending row and col to cell 
                   onPress={() => onPress(rowIndex, colIndex)} />
-                // <Pressable
-                //   key={`row - ${rowIndex} - col - ${colIndex}`}
-                //   onPress={() => onPress(rowIndex, colIndex)} style={styles.cell}>
-                //   {cell == 'o' && <View style={styles.circle} />}
-                //   {cell == 'x' && <Cross />}
-                // </Pressable>
+
               ))}
 
             </View>
 
           ))}
-
         </View>
-      </ImageBackground>
+        <View style={styles.buttons}>
+          <Text onPress={() => setGameMode("LOCAL")} style={[
+            styles.button,
+            { backgroundColor: gameMode === "LOCAL" ? "#4F5686" : "#191F24" },
+          ]}>Local</Text>
+          <Text onPress={() => setGameMode("BOT_EASY")}
+            style={[
+              styles.button,
+              {
+                backgroundColor:
+                  gameMode === "BOT_EASY" ? "#4F5686" : "#191F24",
+              },
+            ]}>Easy Bot</Text>
+          <Text onPress={() => setGameMode("BOT_MEDIUM")}
+            style={[
+              styles.button,
+              {
+                backgroundColor:
+                  gameMode === "BOT_MEDIUM" ? "#4F5686" : "#191F24",
+              },
+            ]}>Medium Bot</Text>
+        </View>
+
+
+      </ImageBackground >
       <StatusBar style="auto" />
-    </View>
+    </View >
   );
 }
 
@@ -258,7 +294,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#252D33',
-
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   map: {
@@ -281,9 +318,24 @@ const styles = StyleSheet.create({
     height: "100%",
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 20,
+    paddingTop: 15,
   },
 
+  buttons: {
+    position: "absolute",
+    bottom: 50,
+    flexDirection: "row",
+  },
+
+  button: {
+    color: "white",
+    margin: 10,
+    fontSize: 20,
+    backgroundColor: "#1991F24",
+    padding: 10,
+    paddingHorizontal: 15,
+
+  },
 
 
 });
