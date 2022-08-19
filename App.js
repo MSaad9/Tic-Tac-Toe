@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ImageBackground, Pressable, Alert } from 'react-native';
 import bg from './assets/bg.jpeg';
-import React, { useState } from 'react';
-import Cross from './src/components/Cross';
+import React, { useState, useEffect } from 'react';
+import Cell from './src/components/Cell';
 
 const emptyMap = [
   ["", "", ""],
@@ -11,11 +11,18 @@ const emptyMap = [
 ];
 export default function App() {
   const [map, setMap] = useState(emptyMap);
-
   const [currentTurn, setCurrentTurn] = useState('x');
 
+  useEffect(() => {
+
+    if (currentTurn == "o") {
+      botTurn();
+    }
+    // botTurn is trigered every time currentTurn changes but with if condition only 'o' 
+  }, [currentTurn]);
+
   const onPress = (rowIndex, colIndex) => {
-    console.warn("Hello", rowIndex, colIndex);
+
     if (map[rowIndex][colIndex] != "") {
       Alert.alert("Position already occupied");
       return;
@@ -134,6 +141,24 @@ export default function App() {
 
   };
 
+  const botTurn = () => {
+    // collect all possible options
+    const possiblePositions = [];
+    map.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell == '') {
+          possiblePositions.push({ row: rowIndex, col: colIndex });
+        }
+      });
+    });
+    // choose the best option
+    const choosenOption = possiblePositions[Math.floor(Math.random() * possiblePositions.length)];
+    if (choosenOption) {
+      onPress(choosenOption.row, choosenOption.col);
+    }
+
+  };
+
   const resetGame = () => {
     setMap([
       ["", "", ""],
@@ -158,12 +183,18 @@ export default function App() {
           {map.map((row, rowIndex) => (
             <View key={`row - ${rowIndex}`} style={styles.row}>
               {row.map((cell, colIndex) => (
-                <Pressable
+                <Cell
                   key={`row - ${rowIndex} - col - ${colIndex}`}
-                  onPress={() => onPress(rowIndex, colIndex)} style={styles.cell}>
-                  {cell == 'o' && <View style={styles.circle} />}
-                  {cell == 'x' && <Cross />}
-                </Pressable>
+                  cell={cell}
+                  // on press would not receive anything from cell but local method would send the rowIndex and colIndex 
+                  // no point in sending row and col to cell 
+                  onPress={() => onPress(rowIndex, colIndex)} />
+                // <Pressable
+                //   key={`row - ${rowIndex} - col - ${colIndex}`}
+                //   onPress={() => onPress(rowIndex, colIndex)} style={styles.cell}>
+                //   {cell == 'o' && <View style={styles.circle} />}
+                //   {cell == 'x' && <Cross />}
+                // </Pressable>
               ))}
 
             </View>
@@ -197,13 +228,7 @@ const styles = StyleSheet.create({
 
   },
 
-  cell: {
-    width: 100,
-    height: 100,
-    flex: 1,
 
-
-  },
 
   bg: {
     width: "100%",
@@ -212,17 +237,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: 20,
   },
-  circle: {
 
-    flex: 1,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 10,
-    borderWidth: 5,
-    borderColor: 'white',
-
-  },
 
 
 });
