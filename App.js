@@ -1,3 +1,5 @@
+// This game is developed just for the purposes of learning
+// Developed by following this titorial on youtube: https://www.youtube.com/watch?v=Koi1Y_Gb_js
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ImageBackground, Pressable, Alert } from 'react-native';
 import bg from './assets/bg.jpeg';
